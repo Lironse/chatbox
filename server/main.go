@@ -1,12 +1,21 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync"
 
 	"github.com/gorilla/websocket"
 )
+
+type Packet struct {
+	Type    string `json:"type"`
+	Action  string `json:"action"`
+	Payload string `json:"payload"`
+	From    string `json:"from"`
+	To      string `json:"to"`
+}
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -55,8 +64,9 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	clientsMutex.Unlock()
 
 	for {
+		var packet Packet
 		// Read SDP message from the browser
-		_, message, err := conn.ReadMessage()
+		err = conn.ReadJSON(&packet)
 		if err != nil {
 			fmt.Println("Error reading message:", err)
 			removeClient(conn)
@@ -65,9 +75,9 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 		// Print the received SDP message
 		fmt.Printf("Received SDP from: %s\n", r.RemoteAddr)
-
 		// Broadcast the SDP message to all other clients
-		broadcastMessage(message, conn)
+		packetString, _ := json.Marshal(packet)
+		broadcastMessage([]byte(packetString), conn)
 	}
 }
 
@@ -75,7 +85,7 @@ func main() {
 	http.HandleFunc("/ws", handleWebSocket)
 
 	// Start the WebSocket server on port 8080
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":27357", nil)
 	if err != nil {
 		fmt.Println("Error starting server:", err)
 	}

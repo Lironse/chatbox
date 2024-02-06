@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { messageFeed, usernameStore, rtc } from '$lib/stores.ts';
-    import { addMessageToChat } from '$lib/index.ts';
+	import { messageFeed, username, rtc } from '$lib/stores.ts'
+    import { addMessageToChat } from '$lib/index.ts'
 
-	let addMessageInput: string;
+	let addMessageInput: string
     
     function addMessage() {
-        addMessageToChat(addMessageInput, $usernameStore, '1')
+        addMessageToChat(addMessageInput, $username, $username)
         rtc.sendMessage(addMessageInput)
         addMessageInput = ''
     }
@@ -14,6 +14,7 @@
 
 <form class="p-4" name="addPeer" on:submit={addMessage}>
 	<input
+		id='message-input'
 		bind:value={addMessageInput}
 		class="input"
 		type="text"

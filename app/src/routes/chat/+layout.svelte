@@ -3,6 +3,7 @@
 	import Sidebar from './components/Sidebar.svelte'
 	import ChatHeader from './components/ChatHeader.svelte'
 	import ChatFooter from './components/ChatFooter.svelte'
+	import { selectedPeer } from '$lib/stores.ts'
 	
 </script>
 
@@ -11,11 +12,15 @@
 		<Sidebar />
 	</svelte:fragment>
 
-	<svelte:fragment slot="pageHeader">
-		<ChatHeader />
-	</svelte:fragment>
+		<svelte:fragment slot="pageHeader">
+			{#if $selectedPeer}
+				<ChatHeader />
+			{/if}
+		</svelte:fragment>
 
-	<slot />
+		{#if $selectedPeer}
+		<slot />
+		{/if}
 
 	<svelte:fragment slot="pageFooter">
 		<ChatFooter />
