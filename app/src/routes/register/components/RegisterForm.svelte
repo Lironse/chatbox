@@ -1,6 +1,7 @@
 <script lang='ts'>
-    import { username } from '$lib/stores.ts'
+    import { username, socket } from '$lib/stores.ts'
     import { onMount } from 'svelte'
+    import { Packet } from '$lib/packet.ts'
 
     let usernameInput: string = ''
     let usernameValidity: string = 'Valid'
@@ -9,7 +10,7 @@
 
     onMount( () => {
 		// Check if the username for registration is valid
-        const usernameInputElement = document.getElementById('username-input') as HTMLInputElement;
+        const usernameInputElement = document.getElementById('username-input') as HTMLInputElement
         usernameInputElement.addEventListener('input', () => {
             checkUsernameValidity()
         })
@@ -31,6 +32,15 @@
 			waitForRegistration(true)
 			username.set(usernameInput)
 			localStorage.setItem('username', usernameInput)
+            let registrationPacket = new Packet(
+                'post',
+                'register',
+                '',
+                usernameInput,
+                'server'
+            )
+            console.log('sent registration packet')
+            socket.send(JSON.stringify(registrationPacket))
 		}
     }
 

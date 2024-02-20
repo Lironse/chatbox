@@ -17,12 +17,13 @@
 				<ChatHeader />
 			{/if}
 		</svelte:fragment>
-
-		{#if $selectedPeer}
+		
 		<slot />
-		{/if}
+	
 
 	<svelte:fragment slot="pageFooter">
-		<ChatFooter />
+		{#if $selectedPeer}
+			<ChatFooter />
+		{/if}
 	</svelte:fragment>
 </AppShell>

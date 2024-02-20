@@ -18,3 +18,4 @@ export const savedPeers: Writable<Peer[]> = writable(
 export const messageFeed: Writable<Bubble[]> = writable([])
 export const username = writable(localStorage.getItem('username') ? localStorage.getItem('username')  : '')
 export const rtc = new RTC()
+export const socket = new WebSocket('ws://87.68.161.205:27357/ws')

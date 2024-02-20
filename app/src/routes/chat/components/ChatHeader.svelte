@@ -4,9 +4,7 @@
 
     let peer
     selectedPeer.subscribe((value) => {
-        if (value) {
-            peer = value
-        }
+        peer = value
     })
 </script>
 

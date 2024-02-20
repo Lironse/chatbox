@@ -1,9 +1,12 @@
 <script lang='ts'>
     import { Avatar } from '@skeletonlabs/skeleton'
-    import { messageFeed, rtc, username } from '$lib/stores.ts'
+    import { messageFeed, rtc, username, socket, selectedPeer } from '$lib/stores.ts'
     import { RTC } from '$lib/rtc.ts'
     import { Packet } from '$lib/packet.ts'
     import { goto } from '$app/navigation'
+    import { Peer } from '$lib/peer.ts'
+    import { get } from 'svelte/store'
+
 
     if (localStorage.getItem('username') == null) {
         goto("../register")
@@ -11,23 +14,26 @@
 
     async function sendOffer() {
         const offer: string = await rtc.makeOffer()
-        socket.send(JSON.stringify(new Packet('post', 'passOffer', offer, $username, 'to')) || '');
+        let peer = get(selectedPeer)
+        console.log(peer)
+        socket.send(JSON.stringify(new Packet('post', 'passOffer', offer, $username, peer.name)) || '');
         console.log('offer sent')
     }
 
     async function sendAnswer(offer: string) {
         const answer: string = await rtc.makeAnswer(offer)
-        socket.send(JSON.stringify(new Packet('post', 'passAnswer', answer, $username, 'to')) || '');
+        let peer = get(selectedPeer)
+        socket.send(JSON.stringify(new Packet('post', 'passAnswer', answer, $username, peer.name)) || '')
         console.log('answer sent')
     }
     
 // ----------------------------------------------------------------
 
-    const socket = new WebSocket('ws://87.68.160.30:27357/ws')
 
     socket.onopen = () => {
         console.log('WebSocket connection opened.')
-    };
+        socket.send(JSON.stringify(new Packet('post', 'open', '', $username, 'server')) || '')
+    }
 
     socket.onmessage = async (event) => {
         const response = JSON.parse(event.data)
@@ -40,13 +46,12 @@
             case 'offer':
                 console.log('received offer', payload)
                 await sendAnswer(JSON.stringify(payload))
-                break
+                
             case 'answer':
                 console.log('recieved answer', payload)
                 await rtc.acceptAnswer(JSON.stringify(payload))
-                break
         }
-    };
+    }
 
     socket.onclose = () => {
         console.log('WebSocket connection closed.')
@@ -57,7 +62,9 @@
 
 <div class='bg-transparent p-4 flex flex-col gap-3 overflow-y-auto'>
     
+    {#if $selectedPeer}
     <button on:click={sendOffer} class="btn variant-filled-secondary">Offer</button>
+    {/if}
 
     {#each $messageFeed as message }
 

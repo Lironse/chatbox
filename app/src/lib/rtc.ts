@@ -1,7 +1,7 @@
 import { addMessageToChat } from '$lib/index.ts'
-import { selectedPeer } from '$lib/stores.ts'
+import { selectedPeer, savedPeers, socket } from '$lib/stores.ts'
 import { Peer } from '$lib/peer.ts'
-
+import { get } from 'svelte/store'
 
 export class RTC {
 	conn: RTCPeerConnection;
@@ -17,8 +17,7 @@ export class RTC {
 		this.chan.onmessage = (e) => this.handleIncomingMessage(e.data)
 		this.chan.onopen = (e) => {
 			console.log('initial channel opened')
-			selectedPeer.set(new Peer(this.from, this.from))
-			this.sendQueuedMessages()
+			this.onConnection()
 		}
 		this.chan.onclose = (e) => console.log('initial channel closed.')
 	}
@@ -46,8 +45,7 @@ export class RTC {
 			this.chan.onmessage = (e) => this.handleIncomingMessage(e.data)
 			this.chan.onopen = (e) => {
 				console.log('answering channel opened')
-				selectedPeer.set(new Peer(this.from, this.from))
-				this.sendQueuedMessages()
+				this.onConnection()
 			}
 			this.chan.onclose = (e) => console.log('answering channel closed.')
 		};
@@ -88,13 +86,26 @@ export class RTC {
     }
 
     handleIncomingMessage(message: string) {
-        console.log('received:', message)
-		let peer = {name: 'unset', avatar: 'unset'}
-		selectedPeer.subscribe((value) => {
-			peer = value
-		})
+		let peer = get(selectedPeer)
         addMessageToChat(message, peer.name, peer.avatar)
     }
+
+	onConnection() {
+		// socket.close()
+		let newPeer = new Peer(this.from, this.from)
+		selectedPeer.set(newPeer)
+		
+		let peers = get(savedPeers)
+		const peerExists = peers.some((peer) => peer.name === newPeer.name);
+
+		if (!peerExists) {
+			// Peer doesn't exist, add it to savedPeers
+			savedPeers.update((peers) => [...peers, newPeer]); // Adjust update function according to your store implementation
+			localStorage.setItem('savedPeers', JSON.stringify(peers));
+		}
+		
+		this.sendQueuedMessages()
+	}
 }
 
 
