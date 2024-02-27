@@ -1,5 +1,13 @@
 <script lang='ts'>
     import { username } from '$lib/stores.ts'
+    import { generateKeyPair } from '$lib/keys.ts'
+
+
+    generateKeyPair().then(keys => {
+        console.log('Public Key:', keys.publicKey);
+        console.log('Private Key:', keys.privateKey);
+    })
+
 </script>
 
 <div class="grid h-full">
@@ -7,7 +15,7 @@
         <h2 class="h2">
             <span class="bg-gradient-to-br from-red-500 to-pink-300 bg-clip-text text-transparent box-decoration-clone">Welcome, {$username}!</span>
         </h2>
-        <span>your private key has been saved to some location.</span>
+        <span>You may copy your keys from the browser console.</span>
         <div class="flex justify-end">
             <a type="button" href="/chat" class="btn variant-filled">Continue</a>
         </div>

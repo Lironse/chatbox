@@ -1,11 +1,10 @@
 <script>
-import { goto } from '$app/navigation';
+    import { goto } from '$app/navigation'
+
+    // redirect if logged in already
+    console.log(localStorage.getItem('username'))
+    localStorage.getItem('username') ?
+    goto("/chat") :
+    goto("/register")
+
 </script>
-
-{#if localStorage.getItem('username') == null}
-    {goto("/register")}
-{/if}
-
-{#if localStorage.getItem('username') != null}
-    {goto("/chat")}
-{/if}

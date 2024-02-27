@@ -1,12 +1,13 @@
 <script lang='ts'>
-    import { username, socket } from '$lib/stores.ts'
+    import { sendPacket } from '$lib/socket.ts'
+    import { username } from '$lib/stores.ts'
     import { onMount } from 'svelte'
     import { Packet } from '$lib/packet.ts'
 
     let usernameInput: string = ''
     let usernameValidity: string = 'Valid'
 
-    export let waitForRegistration
+    export let waitForRegistration: Function
 
     onMount( () => {
 		// Check if the username for registration is valid
@@ -40,7 +41,7 @@
                 'server'
             )
             console.log('sent registration packet')
-            socket.send(JSON.stringify(registrationPacket))
+            sendPacket(registrationPacket)
 		}
     }
 
@@ -73,8 +74,8 @@
 
     <div>
         <span class="pt-10">Have an account already?</span>
-        <span class="text-blue-500" role="button" onclick="window.location.href='../login'">
+        <a href="../login" class="text-blue-500">
             Log in
-        </span>
+        </a>
     </div>
 </form>

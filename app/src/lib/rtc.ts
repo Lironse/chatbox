@@ -1,18 +1,22 @@
 import { addMessageToChat } from '$lib/index.ts'
-import { selectedPeer, savedPeers, socket } from '$lib/stores.ts'
+import { selectedPeer, savedPeers } from '$lib/stores.ts'
 import { Peer } from '$lib/peer.ts'
 import { get } from 'svelte/store'
 
 export class RTC {
-	conn: RTCPeerConnection;
-	chan: RTCDataChannel;
-    msgQueue: string[];
-	from: string;
+	conn: RTCPeerConnection
+	chan: RTCDataChannel
+    msgQueue: string[]
+	from: string
 
 	constructor() {
 		this.from = 'unset'
         this.msgQueue = []
-		this.conn = new RTCPeerConnection()
+		this.conn = new RTCPeerConnection({
+			iceServers: [
+				{ urls: 'stun:stun.l.google.com:19302' },
+			],
+		})
 		this.chan = this.conn.createDataChannel('chat')
 		this.chan.onmessage = (e) => this.handleIncomingMessage(e.data)
 		this.chan.onopen = (e) => {
@@ -48,10 +52,10 @@ export class RTC {
 				this.onConnection()
 			}
 			this.chan.onclose = (e) => console.log('answering channel closed.')
-		};
+		}
 
 		await this.conn.setRemoteDescription(JSON.parse(offer))
-		this.conn.createAnswer().then((answer) => this.conn.setLocalDescription(answer));
+		this.conn.createAnswer().then((answer) => this.conn.setLocalDescription(answer))
 
 		await new Promise<void>((resolve) => {
 			this.conn.onicegatheringstatechange = () => {
@@ -91,17 +95,16 @@ export class RTC {
     }
 
 	onConnection() {
-		// socket.close()
 		let newPeer = new Peer(this.from, this.from)
 		selectedPeer.set(newPeer)
 		
 		let peers = get(savedPeers)
-		const peerExists = peers.some((peer) => peer.name === newPeer.name);
+		const peerExists = peers.some((peer) => peer.name === newPeer.name)
 
 		if (!peerExists) {
 			// Peer doesn't exist, add it to savedPeers
-			savedPeers.update((peers) => [...peers, newPeer]); // Adjust update function according to your store implementation
-			localStorage.setItem('savedPeers', JSON.stringify(peers));
+			savedPeers.update((peers) => [...peers, newPeer]) // Adjust update function according to your store implementation
+			localStorage.setItem('savedPeers', JSON.stringify(peers))
 		}
 		
 		this.sendQueuedMessages()
