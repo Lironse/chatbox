@@ -1,0 +1,25 @@
+{
+  "files.exclude": {
+    "**/app/.svelte-kit": false,
+    "**/app/node_modules": false,
+    "**/app/.vscode": false,
+    "**/app/.gitignore": false,
+    "**/app/.npmrc": false,
+    "**/app/.prettierignore": false,
+    "**/app/.prettierrc": false,
+    "**/app/postcss.config.cjs": false,
+    "**/app/svelte.config.js": false,
+    "**/app/package-lock.json": false,
+    "**/app/package.json": false,
+    "**/app/tsconfig.json": false,
+    "**/app/vite.config.ts": false,
+    "**/app/tailwind.config.ts": false,
+    "**/app/README.md": false,
+    "**/app/src/app.d.ts": false,
+    "**/package-lock.json": false,
+    "**/.gitattributes": false,
+    "**/.vscode": true,
+    "**/server/go.mod": false,
+    "**/server/go.sum": false
+  }
+}

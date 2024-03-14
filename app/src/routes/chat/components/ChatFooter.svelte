@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { messageFeed, username, rtc } from '$lib/stores.ts'
+	import { username, rtc } from '$lib/stores.ts'
     import { addMessageToChat } from '$lib/index.ts'
 
 	let addMessageInput: string
@@ -20,6 +20,8 @@
 		type="text"
 		placeholder="Enter message"
 		maxlength="50"
+		autocomplete="off"
+		spellcheck="false"
 	/>
 	<input type="submit" hidden />
 </form>

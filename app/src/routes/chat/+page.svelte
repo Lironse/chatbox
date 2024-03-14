@@ -1,7 +1,7 @@
 <script lang='ts'>
     import { sendPacket } from '$lib/socket.ts'
     import { Avatar } from '@skeletonlabs/skeleton'
-    import { messageFeed, rtc, username, selectedPeer } from '$lib/stores.ts'
+    import { messageFeed, rtc, username, selectedPeer, connectionStatus } from '$lib/stores.ts'
     import { Packet } from '$lib/packet.ts'
     import { goto } from '$app/navigation'
     import { get } from 'svelte/store'
@@ -15,9 +15,14 @@
         const offer: string = await rtc.makeOffer()
         let peer = get(selectedPeer)
         console.log(peer)
-        let packet = new Packet('post', 'passOffer', offer, $username || '', peer.name)
+        let packet = new Packet('passPacket', offer, $username || '', peer.name)
         sendPacket(packet)
         console.log('offer sent')
+    }
+
+    function closeConnection() {
+        rtc.conn.close()
+        rtc.resetConnection()
     }
 
 </script>
@@ -25,8 +30,12 @@
 
 <div class='bg-transparent p-4 flex flex-col gap-3 overflow-y-auto'>
     
-    {#if $selectedPeer}
-        <button on:click={sendOffer} class="btn variant-filled-secondary">Offer</button>
+    {#if $selectedPeer && $connectionStatus != "open"}
+        <button on:click={sendOffer} class="btn variant-filled-secondary">Connect</button>
+    {/if}
+
+    {#if $connectionStatus == "open"}
+        <button on:click={closeConnection} class="btn variant-soft-primary">Close</button>
     {/if}
 
     {#each $messageFeed as message }

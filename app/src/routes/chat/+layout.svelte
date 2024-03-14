@@ -12,18 +12,19 @@
 		<Sidebar />
 	</svelte:fragment>
 
-		<svelte:fragment slot="pageHeader">
-			{#if $selectedPeer}
-				<ChatHeader />
-			{/if}
-		</svelte:fragment>
-		
-		<slot />
+	<svelte:fragment slot="pageHeader">
+		{#if $selectedPeer}
+			<ChatHeader />
+		{/if}
+	</svelte:fragment>
 	
-
+	
 	<svelte:fragment slot="pageFooter">
 		{#if $selectedPeer}
 			<ChatFooter />
 		{/if}
 	</svelte:fragment>
+
+	<slot />
+
 </AppShell>

@@ -1,11 +1,13 @@
 <script lang='ts'>
-    import { selectedPeer } from '$lib/stores.ts';
-    import { Avatar } from '@skeletonlabs/skeleton';
+	import type { Peer } from '$lib/peer';
+    import { selectedPeer } from '$lib/stores.ts'
+    import { Avatar } from '@skeletonlabs/skeleton'
 
-    let peer
+    let peer: Peer
     selectedPeer.subscribe((value) => {
         peer = value
     })
+
 </script>
 
 <div class='flex flex-row gap-5 justify-start items-center'>

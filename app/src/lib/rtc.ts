@@ -1,7 +1,5 @@
 import { addMessageToChat } from '$lib/index.ts'
-import { selectedPeer, savedPeers } from '$lib/stores.ts'
-import { Peer } from '$lib/peer.ts'
-import { get } from 'svelte/store'
+import { connectionStatus } from './stores'
 
 export class RTC {
 	conn: RTCPeerConnection
@@ -19,11 +17,11 @@ export class RTC {
 		})
 		this.chan = this.conn.createDataChannel('chat')
 		this.chan.onmessage = (e) => this.handleIncomingMessage(e.data)
-		this.chan.onopen = (e) => {
+		this.chan.onopen = () => {
 			console.log('initial channel opened')
 			this.onConnection()
 		}
-		this.chan.onclose = (e) => console.log('initial channel closed.')
+		this.chan.onclose = () => this.handleConnectionClosed()
 	}
 
 	async makeOffer(): Promise<string> {
@@ -51,7 +49,7 @@ export class RTC {
 				console.log('answering channel opened')
 				this.onConnection()
 			}
-			this.chan.onclose = (e) => console.log('answering channel closed.')
+			this.chan.onclose = () => this.handleConnectionClosed()
 		}
 
 		await this.conn.setRemoteDescription(JSON.parse(offer))
@@ -70,7 +68,7 @@ export class RTC {
 	}
 
 	async acceptAnswer(answer: string) {
-		this.conn.setRemoteDescription(JSON.parse(answer))
+		await this.conn.setRemoteDescription(JSON.parse(answer))
 	}
 
 	async sendMessage(message: string) {
@@ -90,24 +88,21 @@ export class RTC {
     }
 
     handleIncomingMessage(message: string) {
-		let peer = get(selectedPeer)
-        addMessageToChat(message, peer.name, peer.avatar)
+        addMessageToChat(message, this.from, this.from)
     }
 
 	onConnection() {
-		let newPeer = new Peer(this.from, this.from)
-		selectedPeer.set(newPeer)
-		
-		let peers = get(savedPeers)
-		const peerExists = peers.some((peer) => peer.name === newPeer.name)
-
-		if (!peerExists) {
-			// Peer doesn't exist, add it to savedPeers
-			savedPeers.update((peers) => [...peers, newPeer]) // Adjust update function according to your store implementation
-			localStorage.setItem('savedPeers', JSON.stringify(peers))
-		}
-		
+		connectionStatus.set('open')
 		this.sendQueuedMessages()
+	}
+
+	handleConnectionClosed() {
+		console.log('answering channel closed.')
+		connectionStatus.set('closed')
+	}
+
+	resetConnection(): RTC {
+		return new RTC()
 	}
 }
 
