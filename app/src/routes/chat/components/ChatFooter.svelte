@@ -1,20 +1,25 @@
 <script lang="ts">
-	import { username, rtc } from '$lib/stores.ts'
-    import { addMessageToChat } from '$lib/index.ts'
+	import { rtcs, username, selectedPeer } from '$lib/stores.ts';
+	import { addMessageToChat } from '$lib/index.ts';
+	import { get } from 'svelte/store';
 
-	let addMessageInput: string
-    
-    function addMessage() {
-        addMessageToChat(addMessageInput, $username, $username)
-        rtc.sendMessage(addMessageInput)
-        addMessageInput = ''
-    }
+	let addMessageInput: string;
 
+	function addMessage() {
+		addMessageToChat(addMessageInput, get(username), get(username));
+		get(rtcs).forEach((rtc) => {
+			if (rtc.peerName == get(selectedPeer).name) {
+				rtc.sendMessage(addMessageInput);
+				return;
+			}
+		});
+		addMessageInput = '';
+	}
 </script>
 
 <form class="p-4" name="addPeer" on:submit={addMessage}>
 	<input
-		id='message-input'
+		id="message-input"
 		bind:value={addMessageInput}
 		class="input"
 		type="text"

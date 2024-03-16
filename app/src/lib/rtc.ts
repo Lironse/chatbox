@@ -1,27 +1,43 @@
 import { addMessageToChat } from '$lib/index.ts'
-import { connectionStatus } from './stores'
+import { get } from 'svelte/store'
+import { Packet } from './packet'
+import { connectionStatus, selectedPeer, username } from './stores'
+import { sendPacket } from './socket'
 
 export class RTC {
 	conn: RTCPeerConnection
 	chan: RTCDataChannel
-    msgQueue: string[]
-	from: string
+	msgQueue: string[]
+	peerName: string
 
-	constructor() {
-		this.from = 'unset'
-        this.msgQueue = []
+	constructor(peerName: string) {
+		this.peerName = peerName
+		this.msgQueue = []
+
 		this.conn = new RTCPeerConnection({
+			// udp hole punching
 			iceServers: [
 				{ urls: 'stun:stun.l.google.com:19302' },
 			],
 		})
-		this.chan = this.conn.createDataChannel('chat')
-		this.chan.onmessage = (e) => this.handleIncomingMessage(e.data)
-		this.chan.onopen = () => {
-			console.log('initial channel opened')
-			this.onConnection()
+
+		this.conn.ondatachannel = (e) => {
+			this.chan = e.channel
 		}
-		this.chan.onclose = () => this.handleConnectionClosed()
+
+		this.chan = this.conn.createDataChannel(peerName)
+		
+		this.chan.onmessage = (e) => {
+			this.handleIncomingMessage(e.data)
+		}
+
+		this.chan.onopen = () => {
+			this.handleConnectionOpened()
+		}
+
+		this.chan.onclose = () => {
+			this.handleConnectionClosed()
+		}
 	}
 
 	async makeOffer(): Promise<string> {
@@ -41,17 +57,6 @@ export class RTC {
 	}
 
 	async makeAnswer(offer: string): Promise<string> {
-		this.chan.close()
-		this.conn.ondatachannel = (e) => {
-			this.chan = e.channel
-			this.chan.onmessage = (e) => this.handleIncomingMessage(e.data)
-			this.chan.onopen = (e) => {
-				console.log('answering channel opened')
-				this.onConnection()
-			}
-			this.chan.onclose = () => this.handleConnectionClosed()
-		}
-
 		await this.conn.setRemoteDescription(JSON.parse(offer))
 		this.conn.createAnswer().then((answer) => this.conn.setLocalDescription(answer))
 
@@ -71,29 +76,32 @@ export class RTC {
 		await this.conn.setRemoteDescription(JSON.parse(answer))
 	}
 
-	async sendMessage(message: string) {
-        if (this.chan.readyState != 'open') {
-            this.msgQueue.push(message)
-        }
-        else {
-            this.chan.send(message)
-        }
+	sendMessage(message: string) {
+		if (this.chan.readyState != 'open') {
+			console.log('adding to queue')
+			this.msgQueue.push(message)
+		}
+		else {
+			this.chan.send(message)
+		}
 	}
 
-    sendQueuedMessages() {
-        while (this.msgQueue.length > 0) {
-            let msg = this.msgQueue.pop()
-            this.chan.send(msg || '')
-        }
-    }
+	sendQueuedMessages() {
+		console.log('sending queued messages: ', this.msgQueue)
+		while (this.msgQueue.length > 0) {
+			let msg = this.msgQueue.pop()
+			this.chan.send(msg || '')
+		}
+	}
 
-    handleIncomingMessage(message: string) {
-        addMessageToChat(message, this.from, this.from)
-    }
-
-	onConnection() {
+	handleConnectionOpened() {
+		console.log('connection opened with:', this.peerName)
 		connectionStatus.set('open')
 		this.sendQueuedMessages()
+	}
+
+	handleIncomingMessage(message: string) {
+		addMessageToChat(message, this.peerName, this.peerName)
 	}
 
 	handleConnectionClosed() {
@@ -101,9 +109,13 @@ export class RTC {
 		connectionStatus.set('closed')
 	}
 
-	resetConnection(): RTC {
-		return new RTC()
+	async sendOffer() {
+		sendPacket(new Packet('passPacket', await this.makeOffer(), get(username), get(selectedPeer).name));
+		console.log('offer sent to:', this.peerName);
+	}
+
+	async sendAnswer(offer: string) {
+		sendPacket(new Packet('passPacket', await this.makeAnswer(offer), get(username) || '', get(selectedPeer).name))
+		console.log('answer sent to:', this.peerName)
 	}
 }
-
-
