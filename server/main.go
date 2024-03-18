@@ -8,7 +8,7 @@ import (
 func main() {
 	go input()
 	logInfo("Server started. Waiting for connections...")
-	http.HandleFunc("/ws", handleWebSocket)
+	http.HandleFunc("/wss", handleWebSocket)
 
 	err := http.ListenAndServe(":27357", nil)
 	if err != nil {
