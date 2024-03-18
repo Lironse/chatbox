@@ -5,6 +5,6 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	plugins: [sveltekit(), purgeCss()],
 	build: {
-		target: "es2020"
+		target: "esnext"
 	}
 });
