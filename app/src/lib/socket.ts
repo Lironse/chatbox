@@ -4,8 +4,14 @@ import { get } from 'svelte/store'
 import { Peer } from '$lib/peer.ts'
 import { RTC } from './rtc'
 
-const socket = new WebSocket('ws://176.230.36.233:27357/ws')
-// TODO: fetch this IP from somewhere
+async function fetchServer(): Promise<string> {
+    const response = await fetch('/api/servers')
+    const servers = JSON.parse(await response.text());
+    const randomServer = Math.floor(Math.random() * servers.length);
+    return servers[randomServer];
+}
+
+const socket = new WebSocket(await fetchServer())
 
 socket.onopen = () => {
     console.log(`connected to ${socket.url} as @${get(username)}.`)
@@ -32,26 +38,25 @@ socket.onmessage = async (event) => {
         case 'passPacket':
             switch (payload.type) {
                 case 'offer':
-                    console.log('received offer:', payload)
+                    console.log('received offer from:', packet.from)
                     let newRtc = new RTC(packet.from)
                     rtcs.update(rtcs => [...rtcs, newRtc])
-                    newRtc.sendAnswer(JSON.stringify(payload))   
-            
+                    newRtc.sendAnswer(JSON.stringify(payload))
                     break
-                    
+
                 case 'answer':
-                    console.log('recieved answer', payload)
+                    console.log('recieved answer from:', packet.from)
                     get(rtcs).forEach(rtc => {
                         if (rtc.peerName == get(selectedPeer).name) {
                             rtc.acceptAnswer(JSON.stringify(payload))
                             return
                         }
-                    });
-                break
+                    })
+                    break
             }
             break
         default:
-           alert('faulty packet action' + packet.action)
+            alert('faulty packet action' + packet.action)
     }
 }
 

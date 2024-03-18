@@ -1,5 +1,5 @@
 export async function generateKeyPair(): Promise<{ publicKey: string, privateKey: string }> {
-    // Generate a key pair
+  
     const keyPair = await crypto.subtle.generateKey(
       {
         name: 'RSA-OAEP',

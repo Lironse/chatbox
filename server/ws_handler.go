@@ -56,7 +56,17 @@ func handlePacket(packet Packet, conn *websocket.Conn) error {
 	// open: do nothing
 	// passPacket: forward the recieved packet
 	switch packet.Action {
-	case "register", "connect":
+	case "register":
+		logInfo("new node registered with id:", client.ID)
+		client.Store(packet.From, packet.Payload)
+
+		newClient := Client{
+			Name:      packet.From,
+			PublicKey: packet.Payload,
+		}
+		addClient(newClient, conn)
+
+	case "connect":
 		newClient := Client{
 			Name:      packet.From,
 			PublicKey: packet.Payload,

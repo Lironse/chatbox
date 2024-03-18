@@ -1,7 +1,7 @@
 import { addMessageToChat } from '$lib/index.ts'
 import { get } from 'svelte/store'
 import { Packet } from './packet'
-import { connectionStatus, selectedPeer, username } from './stores'
+import { connectionStatus, rtcs, selectedPeer, username } from './stores'
 import { sendPacket } from './socket'
 
 export class RTC {
@@ -107,6 +107,9 @@ export class RTC {
 	handleConnectionClosed() {
 		console.log('answering channel closed.')
 		connectionStatus.set('closed')
+		rtcs.set(get(rtcs).filter(rtc => rtc !== this))
+		this.chan.close()
+		this.conn.close()
 	}
 
 	async sendOffer() {

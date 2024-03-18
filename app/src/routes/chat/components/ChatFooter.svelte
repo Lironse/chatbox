@@ -17,16 +17,18 @@
 	}
 </script>
 
-<form class="p-4" name="addPeer" on:submit={addMessage}>
-	<input
-		id="message-input"
-		bind:value={addMessageInput}
-		class="input"
-		type="text"
-		placeholder="Enter message"
-		maxlength="50"
-		autocomplete="off"
-		spellcheck="false"
-	/>
-	<input type="submit" hidden />
-</form>
+<footer>
+	<form class="p-4" name="addPeer" on:submit={addMessage}>
+		<input
+			id="message-input"
+			bind:value={addMessageInput}
+			class="input"
+			type="text"
+			placeholder="Enter message"
+			maxlength="50"
+			autocomplete="off"
+			spellcheck="false"
+		/>
+		<input type="submit" hidden />
+	</form>
+</footer>

@@ -18,6 +18,7 @@ func main() {
 
 func input() {
 	var command string
+	client.init()
 	for {
 		fmt.Scanln(&command)
 		switch command {
