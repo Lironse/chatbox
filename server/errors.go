@@ -9,4 +9,5 @@ var (
 	ErrSendPacketFailure    = errors.New("packet could not be sent")
 	ErrClientNotFound       = errors.New("a client was not found")
 	ErrClientAlreadyExists  = errors.New("username is already taken")
+	ErrServerOpenFailure    = errors.New("the server has failed to open")
 )

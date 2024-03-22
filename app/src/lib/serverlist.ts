@@ -1,3 +1,3 @@
-export let list = [
-    'wss://176.230.36.233:27357/wss',
-]
+import type { ServerEntry } from "./types";
+
+export const list: ServerEntry[] = []

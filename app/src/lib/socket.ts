@@ -1,20 +1,20 @@
-import { Packet } from '$lib/packet.ts'
-import { selectedPeer, username, savedPeers, rtcs } from '$lib/stores.ts'
+import { Packet } from '$lib/packet'
+import { selectedPeer, username, savedPeers, rtcs } from '$lib/stores'
 import { get } from 'svelte/store'
-import { Peer } from '$lib/peer.ts'
+import { Peer } from '$lib/peer'
 import { RTC } from './rtc'
 
 async function fetchServer(): Promise<string> {
     const response = await fetch('/api/servers')
     const servers = JSON.parse(await response.text());
-    const randomServer = Math.floor(Math.random() * servers.length);
-    return servers[randomServer];
+    const randomIndex = Math.floor(Math.random() * servers.length);
+    return servers[randomIndex].ip;
 }
 
-const socket = new WebSocket(await fetchServer())
+const socket = new WebSocket('ws://' + await fetchServer() + ':27357/ws')
 
 socket.onopen = () => {
-    console.log(`connected to ${socket.url} as @${get(username)}.`)
+    console.log(`listening to ${socket.url}.`)
     sendPacket(new Packet('connect', localStorage.getItem('publicKey') || 'TODO: error', get(username) || 'guest', 'server'))
 }
 
@@ -56,7 +56,7 @@ socket.onmessage = async (event) => {
             }
             break
         default:
-            alert('faulty packet action' + packet.action)
+            alert('bad packet action' + packet.action)
     }
 }
 

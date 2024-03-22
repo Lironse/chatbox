@@ -4,3 +4,8 @@ export type Bubble = {
     timestamp: string
     message: string
 }
+
+export type ServerEntry = {
+    id: number
+    ip: string
+}

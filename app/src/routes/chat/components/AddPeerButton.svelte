@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { tick } from "svelte";
-    import { Peer } from "$lib/peer";
-    import { savedPeers } from "$lib/stores";
+	import { tick } from 'svelte';
+	import { Peer } from '$lib/peer';
+	import { savedPeers } from '$lib/stores';
 	let addPeerFormShown = false;
-	let addPeerInput;
-	let inputRef;
+	let addPeerInput: string;
+	let inputRef: HTMLInputElement;
 
 	function addPeer() {
 		const peer = new Peer(addPeerInput, addPeerInput);

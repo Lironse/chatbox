@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store'
 import type { Writable } from 'svelte/store'
-import { Peer } from '$lib/peer.ts'
-import type { Bubble } from '$lib/types.ts'
+import { Peer } from '$lib/peer'
+import type { Bubble } from '$lib/types'
 import type { RTC } from './rtc'
 
 function getPeers(): Peer[] {
@@ -18,17 +18,20 @@ savedPeers.subscribe((value) => {
     localStorage.setItem('savedPeers', JSON.stringify(value));
 })
 
+export const username = writable(localStorage.getItem('username') || '')
+username.subscribe((value) => {
+    localStorage.setItem('username', value);
+})
+
 export const selectedPeer: Writable<Peer> = writable()
 
 export const messageFeed: Writable<Bubble[]> = writable([])
 
 export const rtcs: Writable<RTC[]> = writable([])
 
-export const username = writable(localStorage.getItem('username') || '')
-
 export const connectionStatus: Writable<string> = writable('closed')
 
 export const privateKey: string = localStorage.getItem('privateKey') || ''
 export const publicKey: string = localStorage.getItem('publicKey') || ''
 
-export const bio: string  = localStorage.getItem('bio') || ''
+export const bio: string = localStorage.getItem('bio') || ''

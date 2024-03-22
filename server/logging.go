@@ -34,3 +34,12 @@ func logClients() {
 	}
 	fmt.Print(reset)
 }
+
+func logRoutingTable() {
+	for i, bucket := range routingTable.Buckets {
+		fmt.Println("BUCKET", i)
+		for _, entry := range bucket.Entries {
+			fmt.Printf("- Entry {id: %d, value: %s, type: %s}\n", entry.Id, entry.Value, entry.Type)
+		}
+	}
+}

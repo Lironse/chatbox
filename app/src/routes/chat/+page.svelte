@@ -7,6 +7,10 @@
 	import ChatHeader from './components/ChatHeader.svelte';
 	import ChatFooter from './components/ChatFooter.svelte';
 
+	// if (!localStorage.getItem('token')) {
+	// 	goto('/')
+	// }
+
 	if (localStorage.getItem('username') == null) {
 		goto('/');
 	}

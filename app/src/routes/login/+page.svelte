@@ -1,16 +1,13 @@
-<script>
-	import { FileButton } from '@skeletonlabs/skeleton';
-
+<script lang="ts">
+	import LoginForm from './components/LoginForm.svelte';
 </script>
+
 <div class="grid h-full">
-	<form class="w-1/8 place-self-center card p-4 text-token space-y-4 flex flex-col">
-		<h2 class="h2 pb-2">Log in</h2>
-			<input class="input" type="text" placeholder="Username" />
-			<FileButton name="files" class="w-full" button="btn variant-soft-primary">Upload private key (.PEM)</FileButton>
-			<button class="w-full btn variant-filled">Sign in</button>
+	<div class="card w-1/3 place-self-center flex flex-col p-4 space-y-4">
+		<LoginForm/>
 		<div>
-			<span class="pt-10">Don't have an account?</span>
-			<span class="text-blue-500" role="button" onclick="window.location.href='../register'">Register<span>
+			<span class="pt-10">New account needed?</span>
+			<a href="../register" class="text-blue-500"> Register</a>
 		</div>
-	</form>
+	</div>
 </div>
