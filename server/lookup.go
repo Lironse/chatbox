@@ -5,21 +5,21 @@ import (
 	"net/http"
 )
 
-type RegistrationRequest struct {
+type LookupRequest struct {
 	Username string `json:"username"`
-	Key      string `json:"key"`
 }
 
-type RegistrationResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message,omitempty"`
+type LookupResponse struct {
+	Status string `json:"status"`
+	Key    string `json:"key,omitempty"`
 }
 
-func handleRegister(w http.ResponseWriter, r *http.Request) {
+func handleLookupPeer(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
 		handlePreflight(w)
 		return
 	}
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -32,32 +32,41 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	// Decode the request body into a RegistrationRequest struct
-	var reqBody RegistrationRequest
+	var reqBody LookupRequest
 	err := json.NewDecoder(r.Body).Decode(&reqBody)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	var response RegistrationResponse
+	userExists, key := doesUserExist(reqBody.Username)
 
-	registrationStatus := routingTable.isUsernameAvailable(reqBody.Username)
+	var response LookupResponse
 
-	if registrationStatus {
-		// Send a response indicating successful registration
-		response = RegistrationResponse{
-			Status:  "success",
-			Message: "Client registered successfully",
+	if !userExists {
+		response = LookupResponse{
+			Status: "success",
+			Key:    key,
 		}
-
-		routingTable.addNode(Node{Id: hashUsername(reqBody.Username), LocalId: calculateLocalId(hashUsername(reqBody.Username)), Ip: reqBody.Key})
 	} else {
-		response = RegistrationResponse{
-			Status:  "failure",
-			Message: "Username was taken",
+		response = LookupResponse{
+			Status: "user does not exist",
+			Key:    "",
 		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func doesUserExist(username string) (bool, string) {
+	id := hashUsername(username)
+	for _, bucket := range routingTable.Buckets {
+		for _, Entry := range bucket.Entries {
+			if Entry.Id == id {
+				return true, Entry.Value
+			}
+		}
+	}
+	return false, "not found"
 }

@@ -12,10 +12,34 @@
 		addPeerInput = '';
 		addPeerFormShown = false;
 	}
+
+	async function lookupPeer() {
+		// TODO replace this with a global IP
+		const server = 'http://176.230.36.90:27357/lookup';
+
+		const lookupData = { name: addPeerInput };
+		const requestOptions = {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(lookupData)
+		};
+
+		let response = await fetch(server, requestOptions);
+
+		if (!response.ok) {
+			console.log('Failed to add peer: ' + response.statusText);
+			return;
+		}
+
+		console.log(await response.json());
+		addPeer()
+	}
 </script>
 
 {#if addPeerFormShown}
-	<form name="addPeer" on:submit={addPeer}>
+	<form name="addPeer" on:submit={lookupPeer}>
 		<input
 			bind:value={addPeerInput}
 			class="input"

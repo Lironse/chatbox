@@ -1,25 +1,24 @@
-export async function generateKeyPair(): Promise<{ publicKey: string, privateKey: string }> {
-  
-    const keyPair = await crypto.subtle.generateKey(
+async function generateKeyPair() {
+  try {
+    let keyPair = await window.crypto.subtle.generateKey(
       {
         name: 'RSA-OAEP',
-        modulusLength: 2048,
-        publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+        modulusLength: 4096,
+        publicExponent: new Uint8Array([1, 0, 1]),
         hash: 'SHA-256'
       },
       true,
       ['encrypt', 'decrypt']
     );
-  
-    // Export the public key
-    const publicKey = await crypto.subtle.exportKey('spki', keyPair.publicKey);
-  
-    // Export the private key
-    const privateKey = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
-  
-    // Convert the exported keys to Base64 strings
-    const publicKeyString = btoa(String.fromCharCode(...new Uint8Array(publicKey)));
-    const privateKeyString = btoa(String.fromCharCode(...new Uint8Array(privateKey)));
-  
-    return { publicKey: publicKeyString, privateKey: privateKeyString };
+    // Export keys
+    const publicKey = await window.crypto.subtle.exportKey('spki', keyPair.publicKey);
+    const privateKey = await window.crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
+
+    return { publicKey, privateKey };
+  } catch (error) {
+    console.error('Error generating key pair:', error);
+    throw error;
+  }
 }
+
+export const keys = generateKeyPair();

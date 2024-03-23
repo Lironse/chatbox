@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { username } from '$lib/stores.ts';
 	import { goto } from '$app/navigation';
+	import { keys } from '$lib/keys.ts';
 
 	let usernameInput: string = '';
-
 	async function register(): Promise<void> {
 		// TODO replace this with a global IP
 		const registrationUrl = 'http://176.230.36.90:27357/register';
+
 		const registrationData = {
-			name: usernameInput,
-			key: 'someKEYKEYKEKY' // TODO actually generate keys
+			username: usernameInput,
+			key: arrayBufferToBase64((await keys).publicKey)
 		};
 		const requestOptions = {
 			method: 'POST',
@@ -26,16 +27,19 @@
 			return;
 		}
 
-		console.log(await response.json());
+		console.log('registered successfully as', usernameInput);
 		username.set(usernameInput);
 		goto('../chat');
 	}
+
+	function arrayBufferToBase64(buffer: ArrayBuffer): string {
+		const bytes = new Uint8Array(buffer);
+		const string = String.fromCharCode(...bytes);
+		return btoa(string);
+	}
 </script>
 
-<form
-	on:submit|preventDefault={register}
-	class="text-token space-y-4 flex flex-col"
->
+<form on:submit|preventDefault={register} class="text-token space-y-4 flex flex-col">
 	<h2 class="h2 pb-2 font-bold">Register</h2>
 	<input
 		bind:value={usernameInput}
