@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 )
 
@@ -14,8 +15,10 @@ type RoutingTable struct {
 }
 
 func makeRoutingTable() *RoutingTable {
+	bucketAmount := int(math.Ceil(math.Log2(float64(keyspaceSize)))) + 1
+	fmt.Println(bucketAmount)
 	return &RoutingTable{
-		Buckets: make([]Bucket, 5),
+		Buckets: make([]Bucket, bucketAmount),
 		K:       2,
 	}
 }
@@ -27,29 +30,13 @@ func (r *RoutingTable) addNode(node Node) {
 }
 
 func (r *RoutingTable) getBucketIndexForId(id int) int {
-	// TODO check buckets mathematically
 	if id == 0 {
-		return 0
+		return 0 // or handle this case according to your requirements
 	}
-
-	if 1 <= id && id < 3 {
-		return 1
-	}
-
-	if 3 <= id && id < 7 {
-		return 2
-	}
-
-	if 7 <= id && id < 15 {
-		return 3
-	}
-
-	if 15 <= id && id < 32 {
-		return 4
-	}
-	fmt.Println("id is bad", id)
-
-	return 46
+	// TODO check buckets mathematically
+	println("id ", float64(id))
+	println("result ", math.Ceil(math.Log2(float64(id))+1))
+	return int(math.Floor(math.Log2(float64(id)) + 1))
 }
 
 func (r *RoutingTable) addEntryToBucket(index int, e Entry) {
@@ -117,15 +104,16 @@ func (r *RoutingTable) RegisterToServerList() {
 	fmt.Println("Response Body:", string(body))
 }
 
-func (r *RoutingTable) isUsernameAvailable(username string) bool {
+func (r *RoutingTable) doesUserExist(username string) (bool, string) {
 	// TODO: hash the username and check the node ID on the entire network i guess?
-	id := len(username)
+	id := calculateLocalId(hashUsername(username))
 	for _, bucket := range r.Buckets {
 		for _, entry := range bucket.Entries {
+			fmt.Println("checking", entry.Id, "against", id)
 			if entry.Id == id {
-				return false
+				return true, entry.Value
 			}
 		}
 	}
-	return true
+	return false, ""
 }

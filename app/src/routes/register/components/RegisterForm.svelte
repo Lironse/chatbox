@@ -6,7 +6,7 @@
 	let usernameInput: string = '';
 	async function register(): Promise<void> {
 		// TODO replace this with a global IP
-		const registrationUrl = 'http://176.230.36.90:27357/register';
+		const server = 'http://176.230.36.90:27357/register';
 
 		const registrationData = {
 			username: usernameInput,
@@ -20,16 +20,14 @@
 			body: JSON.stringify(registrationData)
 		};
 
-		let response = await fetch(registrationUrl, requestOptions);
+		let response = await (await fetch(server, requestOptions)).json();
 
-		if (!response.ok) {
-			console.log('Failed to register client: ' + response.statusText);
-			return;
+		if (response.status == 'success') {
+			username.set(usernameInput);
+			goto('../chat');
+		} else {
+			alert('Username is taken!');
 		}
-
-		console.log('registered successfully as', usernameInput);
-		username.set(usernameInput);
-		goto('../chat');
 	}
 
 	function arrayBufferToBase64(buffer: ArrayBuffer): string {

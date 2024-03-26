@@ -39,11 +39,11 @@ func handleLookupPeer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userExists, key := doesUserExist(reqBody.Username)
+	userExists, key := routingTable.doesUserExist(reqBody.Username)
 
 	var response LookupResponse
 
-	if !userExists {
+	if userExists {
 		response = LookupResponse{
 			Status: "success",
 			Key:    key,
@@ -57,16 +57,4 @@ func handleLookupPeer(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
-}
-
-func doesUserExist(username string) (bool, string) {
-	id := hashUsername(username)
-	for _, bucket := range routingTable.Buckets {
-		for _, Entry := range bucket.Entries {
-			if Entry.Id == id {
-				return true, Entry.Value
-			}
-		}
-	}
-	return false, "not found"
 }

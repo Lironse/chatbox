@@ -24,7 +24,7 @@ type Entry struct {
 }
 
 func generateID() int {
-	return rand.IntN(32)
+	return rand.IntN(keyspaceSize)
 }
 
 func getPublicIP() string {

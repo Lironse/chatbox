@@ -17,7 +17,7 @@
 		// TODO replace this with a global IP
 		const server = 'http://176.230.36.90:27357/lookup';
 
-		const lookupData = { name: addPeerInput };
+		const lookupData = { username: addPeerInput };
 		const requestOptions = {
 			method: 'POST',
 			headers: {
@@ -26,15 +26,14 @@
 			body: JSON.stringify(lookupData)
 		};
 
-		let response = await fetch(server, requestOptions);
+		let response = await (await fetch(server, requestOptions)).json();
 
-		if (!response.ok) {
-			console.log('Failed to add peer: ' + response.statusText);
-			return;
+		if (response.status == 'success') {
+			console.log(response.status);
+			addPeer();
+		} else {
+			alert('This user was not found!');
 		}
-
-		console.log(await response.json());
-		addPeer()
 	}
 </script>
 

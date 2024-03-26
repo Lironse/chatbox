@@ -18,5 +18,5 @@ func handlePreflight(w http.ResponseWriter) {
 func hashUsername(username string) int {
 	h := fnv.New32a()
 	h.Write([]byte(username))
-	return int(h.Sum32() % 32)
+	return int(h.Sum32()) % keyspaceSize
 }

@@ -16,6 +16,7 @@ type RegistrationResponse struct {
 }
 
 func handleRegister(w http.ResponseWriter, r *http.Request) {
+	// Check method
 	if r.Method == http.MethodOptions {
 		handlePreflight(w)
 		return
@@ -39,22 +40,20 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userExists, _ := routingTable.doesUserExist(reqBody.Username)
+
 	var response RegistrationResponse
 
-	registrationStatus := routingTable.isUsernameAvailable(reqBody.Username)
-
-	if registrationStatus {
-		// Send a response indicating successful registration
+	if !userExists {
 		response = RegistrationResponse{
 			Status:  "success",
 			Message: "Client registered successfully",
 		}
-
 		routingTable.addNode(Node{Id: hashUsername(reqBody.Username), LocalId: calculateLocalId(hashUsername(reqBody.Username)), Ip: reqBody.Key})
 	} else {
 		response = RegistrationResponse{
 			Status:  "failure",
-			Message: "Username was taken",
+			Message: "Username is taken",
 		}
 	}
 
